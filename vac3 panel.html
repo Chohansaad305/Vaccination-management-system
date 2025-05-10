@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Vaccine Management</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; color: #333; }
+    header { background: #0d6efd; color: #fff; padding: 1rem 2rem; text-align: center; }
+    nav { width: 220px; background: #1b1f3b; color: #fff; position: fixed; top: 70px; bottom: 0; padding-top: 2rem; }
+    nav ul { list-style: none; }
+    nav ul li { padding: 15px 20px; cursor: pointer; transition: background 0.3s; }
+    nav ul li:hover { background: #343a5f; }
+    main { margin-left: 240px; padding: 2rem; }
+
+    section { margin-bottom: 2rem; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.05); }
+    h2 { margin-bottom: 1rem; color: #0d6efd; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e0e0e0; }
+    th { background: #f0f4f8; }
+
+    button {
+      background: #0d6efd; color: white; padding: 6px 12px;
+      border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;
+    }
+    button:hover { background: #084298; }
+
+    input[type="text"], input[type="date"] {
+      padding: 6px; border: 1px solid #ccc; border-radius: 4px;
+      margin: 10px 0; width: 100%;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none; position: fixed; z-index: 10; left: 0; top: 0;
+      width: 100%; height: 100%; overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background: white; margin: 10% auto; padding: 20px;
+      border-radius: 8px; width: 400px; box-shadow: 0 0 10px #333;
+    }
+    .close {
+      color: #aaa; float: right; font-size: 24px; font-weight: bold; cursor: pointer;
+    }
+
+    .status-approved { background: #198754; }
+    .status-rejected { background: #dc3545; }
+
+    @media (max-width: 768px) {
+      nav { width: 100%; position: relative; }
+      main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Admin Panel - Vaccine Management System</h1>
+</header>
+
+<nav>
+  <ul>
+    <li>Dashboard</li>
+    <li>Child Details</li>
+    <li>Vaccination Schedule</li>
+    <li>Reports</li>
+    <li>Vaccine Inventory</li>
+    <li>Parent Requests</li>
+    <li>Hospital Management</li>
+    <li>Booking Details</li>
+  </ul>
+</nav>
+
+<main>
+
+  <!-- Vaccine Inventory Filter -->
+  <section id="vaccines">
+    <h2>Vaccine Inventory</h2>
+    <input type="text" id="vaccineSearch" placeholder="Search vaccines...">
+    <table id="vaccineTable">
+      <tr><th>Vaccine</th><th>Status</th><th>Action</th></tr>
+      <tr><td>Hepatitis B</td><td>Available</td><td><button>Update</button></td></tr>
+      <tr><td>Polio</td><td>Unavailable</td><td><button>Update</button></td></tr>
+      <tr><td>MMR</td><td>Available</td><td><button>Update</button></td></tr>
+    </table>
+  </section>
+
+  <!-- Parent Requests with Approve/Reject -->
+  <section id="requests">
+    <h2>Parent Requests</h2>
+    <table>
+      <tr><th>Child</th><th>Vaccine</th><th>Date</th><th>Hospital</th><th>Action</th></tr>
+      <tr>
+        <td>Jane Smith</td><td>Flu</td><td>2025-05-10</td><td>Central Hospital</td>
+        <td>
+          <button onclick="updateStatus(this, 'approved')" class="status-approved">Approve</button>
+          <button onclick="updateStatus(this, 'rejected')" class="status-rejected">Reject</button>
+        </td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Hospital Management Modal -->
+  <section id="hospital-management">
+    <h2>Hospital Management</h2>
+    <button onclick="openModal()">Add New Hospital</button>
+    <table>
+      <tr><th>Name</th><th>Address</th><th>Contact</th><th>Actions</th></tr>
+      <tr><td>Green Care</td><td>12 Baker St</td><td>+987654321</td><td><button>Edit</button><button style="background-color:#dc3545;">Delete</button></td></tr>
+    </table>
+  </section>
+
+</main>
+
+<!-- Modal -->
+<div id="hospitalModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Add Hospital</h3>
+    <input type="text" id="hospitalName" placeholder="Hospital Name">
+    <input type="text" id="hospitalAddress" placeholder="Address">
+    <input type="text" id="hospitalContact" placeholder="Contact">
+    <button onclick="addHospital()">Add Hospital</button>
+  </div>
+</div>
+
+<script>
+  // Modal Functions
+  function openModal() {
+    document.getElementById('hospitalModal').style.display = 'block';
+  }
+
+  function closeModal() {
+    document.getElementById('hospitalModal').style.display = 'none';
+  }
+
+  function addHospital() {
+    const name = document.getElementById('hospitalName').value;
+    const address = document.getElementById('hospitalAddress').value;
+    const contact = document.getElementById('hospitalContact').value;
+    if (!name || !address || !contact) {
+      alert('Please fill all fields.');
+      return;
+    }
+
+    const table = document.querySelector('#hospital-management table');
+    const row = table.insertRow(-1);
+    row.innerHTML = `<td>${name}</td><td>${address}</td><td>${contact}</td><td><button>Edit</button> <button style="background-color:#dc3545;">Delete</button></td>`;
+    closeModal();
+  }
+
+  // Approve/Reject Status
+  function updateStatus(btn, type) {
+    const row = btn.closest('tr');
+    const statusCell = document.createElement('td');
+    statusCell.innerText = type === 'approved' ? 'Approved' : 'Rejected';
+    statusCell.style.color = type === 'approved' ? 'green' : 'red';
+    row.appendChild(statusCell);
+    btn.parentNode.innerHTML = ''; // Remove buttons
+  }
+
+  // Dynamic Vaccine Filter
+  document.getElementById('vaccineSearch').addEventListener('keyup', function () {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#vaccineTable tr:not(:first-child)");
+    rows.forEach(row => {
+      const vaccine = row.cells[0].textContent.toLowerCase();
+      row.style.display = vaccine.includes(filter) ? '' : 'none';
+    });
+  });
+
+  // Close modal if clicked outside content
+  window.onclick = function(event) {
+    const modal = document.getElementById('hospitalModal');
+    if (event.target === modal) modal.style.display = "none";
+  }
+</script>
+
+</body>
+</html>
