@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaccine Management System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background: #f5f5f5; color: #333; }
+    h1, h2, h3 { color: #0d6efd; margin-bottom: 20px; }
+
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); margin: 10px 0; }
+    .container { width: 80%; margin: auto; }
+
+    .hidden { display: none; }
+
+    table {
+      width: 100%; 
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px; 
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .button { background: #0d6efd; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+    .button:hover { background: #084298; }
+    
+    .logout { margin-top: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- Main Container -->
+<div class="container">
+  <h1>Vaccine Management System</h1>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="hidden">
+    <h2>Admin Dashboard</h2>
+    <button class="button" onclick="showAdminSections('children')">View Children Details</button>
+    <button class="button" onclick="showAdminSections('vaccines')">View Vaccine Availability</button>
+    <button class="button" onclick="showAdminSections('hospitals')">View Hospitals</button>
+    <button class="button" onclick="showAdminSections('requests')">View Parent Requests</button>
+    <button class="button" onclick="showAdminSections('booking')">View Booking Details</button>
+
+    <!-- Child Details -->
+    <div id="adminChildrenSection" class="hidden">
+      <h3>All Child Profiles</h3>
+      <table id="childTable"></table>
+    </div>
+
+    <!-- Vaccine Availability -->
+    <div id="adminVaccineSection" class="hidden">
+      <h3>Vaccine Availability</h3>
+      <table id="vaccineTable"></table>
+    </div>
+
+    <!-- Hospital List -->
+    <div id="adminHospitalSection" class="hidden">
+      <h3>List of Hospitals</h3>
+      <table id="hospitalTable"></table>
+    </div>
+
+    <!-- Parent Requests -->
+    <div id="adminRequestsSection" class="hidden">
+      <h3>Requests from Parents</h3>
+      <table id="requestTable"></table>
+    </div>
+
+    <!-- Booking Details -->
+    <div id="adminBookingSection" class="hidden">
+      <h3>Booking Details</h3>
+      <table id="bookingTable"></table>
+    </div>
+  </div>
+
+  <!-- Parent Panel -->
+  <div id="parentPanel" class="hidden">
+    <h2>Parent Dashboard</h2>
+    <button class="button" onclick="showParentSections('childDetails')">View & Update Child Details</button>
+    <button class="button" onclick="showParentSections('vaccinationDates')">Vaccination Dates</button>
+    <button class="button" onclick="showParentSections('hospitalBooking')">Book Hospital</button>
+    <button class="button" onclick="showParentSections('vaccinationReport')">Vaccination Report</button>
+
+    <!-- Child Details -->
+    <div id="parentChildDetails" class="hidden">
+      <h3>Child Details</h3>
+      <input type="text" id="childName" placeholder="Child's Name">
+      <input type="text" id="childAge" placeholder="Child's Age">
+      <button class="button" onclick="updateChildDetails()">Update Details</button>
+    </div>
+
+    <!-- Vaccination Dates -->
+    <div id="parentVaccinationDates" class="hidden">
+      <h3>Upcoming Vaccination Dates</h3>
+      <table id="parentVaccinationTable"></table>
+    </div>
+
+    <!-- Hospital Booking -->
+    <div id="parentHospitalBooking" class="hidden">
+      <h3>Book Hospital</h3>
+      <select id="hospitalSelect"></select>
+      <button class="button" onclick="bookHospital()">Book Appointment</button>
+    </div>
+
+    <!-- Vaccination Report -->
+    <div id="parentVaccinationReport" class="hidden">
+      <h3>Vaccination Report</h3>
+      <table id="parentReportTable"></table>
+    </div>
+
+    <div class="logout">
+      <button class="button" onclick="logoutParent()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Hospital Panel -->
+  <div id="hospitalPanel" class="hidden">
+    <h2>Hospital Dashboard</h2>
+    <button class="button" onclick="showHospitalSections('appointments')">View Appointments</button>
+    <button class="button" onclick="showHospitalSections('vaccinationStatus')">Update Vaccination Status</button>
+
+    <!-- Appointments -->
+    <div id="hospitalAppointments" class="hidden">
+      <h3>Upcoming Appointments</h3>
+      <table id="hospitalAppointmentsTable"></table>
+    </div>
+
+    <!-- Vaccination Status -->
+    <div id="hospitalVaccinationStatus" class="hidden">
+      <h3>Update Vaccination Status</h3>
+      <table id="hospitalVaccinationStatusTable"></table>
+    </div>
+
+    <div class="logout">
+      <button class="button" onclick="logoutHospital()">Logout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Simulated Data (In real-life, would come from a database)
+let hospitals = [
+  { name: "Hospital A", location: "City A" },
+  { name: "Hospital B", location: "City B" }
+];
+
+let children = [
+  { name: "John Doe", age: 2, vaccineDate: "2025-06-01", status: "Pending" },
+  { name: "Jane Smith", age: 1, vaccineDate: "2025-06-15", status: "Pending" }
+];
+
+let vaccines = [
+  { name: "MMR", available: true },
+  { name: "Hepatitis B", available: true },
+  { name: "Polio", available: false }
+];
+
+// Admin Functions
+function showAdminSections(section) {
+  const sections = ['children', 'vaccines', 'hospitals', 'requests', 'booking'];
+  sections.forEach(s => document.getElementById(`admin${capitalizeFirstLetter(s)}Section`).classList.add('hidden'));
+  document.getElementById(`admin${capitalizeFirstLetter(section)}Section`).classList.remove('hidden');
+}
+
+function renderAdminChildDetails() {
+  const table = document.getElementById("childTable");
+  table.innerHTML = `<tr><th>Name</th><th>Age</th><th>Vaccination Date</th><th>Status</th></tr>`;
+  children.forEach(child => {
+    table.innerHTML += `<tr><td>${child.name}</td><td>${child.age}</td><td>${child.vaccineDate}</td><td>${child.status}</td></tr>`;
+  });
+}
+
+function renderAdminVaccineAvailability() {
+  const table = document.getElementById("vaccineTable");
+  table.innerHTML = `<tr><th>Vaccine</th><th>Availability</th></tr>`;
+  vaccines.forEach(vaccine => {
+    table.innerHTML += `<tr><td>${vaccine.name}</td><td>${vaccine.available ? "Available" : "Unavailable"}</td></tr>`;
+  });
+}
+
+// Parent Functions
+function showParentSections(section) {
+  const sections = ['childDetails', 'vaccinationDates', 'hospitalBooking', 'vaccinationReport'];
+  sections.forEach(s => document.getElementById(`parent${capitalizeFirstLetter(s)}`).classList.add('hidden'));
+  document.getElementById(`parent${capitalizeFirstLetter(section)}`).classList.remove('hidden');
+}
+
+function updateChildDetails() {
+  const name = document.getElementById('childName').value;
+  const age = document.getElementById('childAge').value;
+  alert(`Child details updated: ${name}, ${age}`);
+}
+
+function renderParentVaccinationDates() {
+  const table = document.getElementById("parentVaccinationTable");
+  table.innerHTML = `<tr><th>Name</th><th>Vaccination Date</th></tr>`;
+  children.forEach(child => {
+    table.innerHTML += `<tr><td>${child.name}</td><td>${child.vaccineDate}</td></tr>`;
+  });
+}
+
+function renderParentReport() {
+  const table = document.getElementById("parentReportTable");
+  table.innerHTML = `<tr><th>Name</th><th>Status</th></tr>`;
+  children.forEach(child => {
+    table.innerHTML += `<tr><td>${child.name}</td><td>${child.status}</td></tr>`;
+  });
+}
+
+// Hospital Functions
+function showHospitalSections(section) {
+  const sections = ['appointments', 'vaccinationStatus'];
+  sections.forEach(s => document.getElementById(`hospital${capitalizeFirstLetter(s)}`).classList.add('hidden'));
+  document.getElementById(`hospital${capitalizeFirstLetter(section)}`).classList.remove('hidden');
+}
+
+function renderHospitalAppointments() {
+  const table = document.getElementById("hospitalAppointmentsTable");
+  table.innerHTML = `<tr><th>Child</th><th>Vaccination Date</th></tr>`;
+  children.forEach(child => {
+    table.innerHTML += `<tr><td>${child.name}</td><td>${child.vaccineDate}</td></tr>`;
+  });
+}
+
+function renderHospitalVaccinationStatus() {
+  const table = document.getElementById("hospitalVaccinationStatusTable");
+  table.innerHTML = `<tr><th>Child</th><th>Vaccination Status</th></tr>`;
+  children.forEach(child => {
+    table.innerHTML += `<tr><td>${child.name}</td><td><button onclick="updateVaccinationStatus('${child.name}')">Update Status</button></td></tr>`;
+  });
+}
+
+function updateVaccinationStatus(childName) {
+  const status = prompt(`Update vaccination status for ${childName} (Vaccinated/Not Vaccinated):`);
+  alert(`${childName}'s status updated to: ${status}`);
+}
+
+// Utility
+function capitalizeFirstLetter(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Page Load Actions
+document.getElementById('adminPanel').classList.remove('hidden');
+renderAdminChildDetails();
+renderAdminVaccineAvailability();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hospital Panel - Vaccine Management</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background: #f4f6f8; padding: 20px; color: #333; }
+    h1 { text-align: center; color: #0d6efd; margin-bottom: 20px; }
+
+    .card {
+      background: #fff;
+      max-width: 500px;
+      margin: 0 auto 20px;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    h2 { color: #0d6efd; margin-bottom: 10px; }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #0d6efd;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover { background-color: #084298; }
+
+    .hidden { display: none; }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .status-btn {
+      margin-right: 5px;
+      padding: 6px 10px;
+    }
+
+    .status-vaccinated { background: #198754; }
+    .status-not { background: #dc3545; }
+
+    .logout {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .logout button {
+      background-color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Hospital Panel - Vaccine Management</h1>
+
+<!-- Register -->
+<div class="card" id="registerSection">
+  <h2>Register Hospital</h2>
+  <label>Hospital Name</label>
+  <input type="text" id="regName">
+  <label>Address</label>
+  <input type="text" id="regAddress">
+  <label>Location</label>
+  <input type="text" id="regLocation">
+  <label>Password</label>
+  <input type="password" id="regPassword">
+  <button onclick="registerHospital()">Register</button>
+  <p style="margin-top: 10px;">Already registered? <a href="#" onclick="toggleSections('login')">Login</a></p>
+</div>
+
+<!-- Login -->
+<div class="card hidden" id="loginSection">
+  <h2>Login Hospital</h2>
+  <label>Hospital Name</label>
+  <input type="text" id="loginName">
+  <label>Password</label>
+  <input type="password" id="loginPassword">
+  <button onclick="loginHospital()">Login</button>
+  <p style="margin-top: 10px;">New hospital? <a href="#" onclick="toggleSections('register')">Register</a></p>
+</div>
+
+<!-- Dashboard -->
+<div class="card hidden" id="dashboardSection">
+  <h2>Welcome, <span id="hospitalWelcome"></span></h2>
+  <h3>Appointments</h3>
+  <table>
+    <thead>
+      <tr><th>Child</th><th>Vaccine</th><th>Date</th><th>Status</th></tr>
+    </thead>
+    <tbody id="appointmentTable"></tbody>
+  </table>
+  <div class="logout">
+    <button onclick="logoutHospital()">Logout</button>
+  </div>
+</div>
+
+<!-- EmailJS SDK -->
+<script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script>
+  (function() {
+    emailjs.init("YOUR_USER_ID"); // 🟡 Replace with your actual EmailJS User ID
+  })();
+</script>
+
+<script>
+  let currentHospital = null;
+
+  function toggleSections(view) {
+    document.getElementById('registerSection').classList.toggle('hidden', view !== 'register');
+    document.getElementById('loginSection').classList.toggle('hidden', view !== 'login');
+  }
+
+  function registerHospital() {
+    const name = document.getElementById('regName').value;
+    const address = document.getElementById('regAddress').value;
+    const location = document.getElementById('regLocation').value;
+    const password = document.getElementById('regPassword').value;
+
+    if (!name || !address || !location || !password) {
+      alert("All fields are required.");
+      return;
+    }
+
+    const hospitalData = { name, address, location, password };
+    localStorage.setItem('hospital_' + name.toLowerCase(), JSON.stringify(hospitalData));
+    alert("Registration successful. Please log in.");
+    toggleSections('login');
+  }
+
+  function loginHospital() {
+    const name = document.getElementById('loginName').value.toLowerCase();
+    const password = document.getElementById('loginPassword').value;
+
+    const stored = localStorage.getItem('hospital_' + name);
+    if (!stored) {
+      alert("Hospital not found.");
+      return;
+    }
+
+    const hospital = JSON.parse(stored);
+    if (hospital.password !== password) {
+      alert("Incorrect password.");
+      return;
+    }
+
+    currentHospital = hospital;
+    showDashboard();
+  }
+
+  function showDashboard() {
+    document.getElementById('registerSection').classList.add('hidden');
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('dashboardSection').classList.remove('hidden');
+    document.getElementById('hospitalWelcome').innerText = currentHospital.name;
+
+    loadAppointments();
+  }
+
+  function loadAppointments() {
+    const appointments = [
+      { child: "John Doe", vaccine: "MMR", date: "2025-06-01", status: "Pending" },
+      { child: "Jane Smith", vaccine: "Hepatitis B", date: "2025-06-03", status: "Pending" },
+    ];
+
+    const table = document.getElementById('appointmentTable');
+    table.innerHTML = '';
+    appointments.forEach((appt, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${appt.child}</td>
+        <td>${appt.vaccine}</td>
+        <td>${appt.date}</td>
+        <td>
+          <button class="status-btn status-vaccinated" onclick="updateStatus(this, 'Vaccinated')">Vaccinated</button>
+          <button class="status-btn status-not" onclick="updateStatus(this, 'Not Vaccinated')">Not Vaccinated</button>
+        </td>
+      `;
+      table.appendChild(row);
+    });
+  }
+
+  function updateStatus(button, status) {
+    const td = button.parentElement;
+    const row = td.parentElement;
+    const childName = row.children[0].textContent;
+    const vaccine = row.children[1].textContent;
+    const date = row.children[2].textContent;
+
+    td.innerHTML = `<strong style="color:${status === 'Vaccinated' ? 'green' : 'red'}">${status}</strong>`;
+
+    // Send email using EmailJS
+    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+      hospital_name: currentHospital.name,
+      child_name: childName,
+      vaccine: vaccine,
+      status: status,
+      date: date,
+      to_email: "hospital@email.com" // Replace with dynamic email if needed
+    }).then(function(response) {
+      console.log("Email sent!", response.status, response.text);
+      alert("Email confirmation sent.");
+    }, function(error) {
+      console.error("Email error", error);
+      alert("Failed to send email.");
+    });
+  }
+
+  function logoutHospital() {
+    currentHospital = null;
+    document.getElementById('dashboardSection').classList.add('hidden');
+    toggleSections('login');
+  }
+
+  // Show register section on load
+  toggleSections('register');
+</script>
+
+</body>
+</html>

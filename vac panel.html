@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel - Vaccine Management</title>
+  <style>
+    body { font-family: Arial; }
+    nav, section { margin: 20px; }
+    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 10px; }
+    h2 { background-color: #f2f2f2; padding: 10px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h1>Admin Panel</h1>
+  <ul>
+    <li>Dashboard</li>
+    <li>Child Details</li>
+    <li>Vaccination Schedule</li>
+    <li>Reports</li>
+    <li>Vaccine Inventory</li>
+    <li>Parent Requests</li>
+    <li>Hospital Management</li>
+    <li>Booking Details</li>
+  </ul>
+</nav>
+
+<section id="child-details">
+  <h2>Child Details</h2>
+  <table>
+    <tr><th>ID</th><th>Name</th><th>DOB</th><th>Parent</th><th>Contact</th></tr>
+    <!-- Dynamic rows -->
+  </table>
+</section>
+
+<section id="vaccination-schedule">
+  <h2>Vaccination Schedule</h2>
+  <!-- Table or Calendar View -->
+</section>
+
+<section id="reports">
+  <h2>Vaccination Reports</h2>
+  <form>
+    <label>Select Date:</label><input type="date">
+    <button>Generate Report</button>
+  </form>
+</section>
+
+<section id="vaccines">
+  <h2>Vaccine List</h2>
+  <table>
+    <tr><th>Vaccine</th><th>Status</th><th>Action</th></tr>
+    <!-- Dynamic rows -->
+  </table>
+</section>
+
+<section id="requests">
+  <h2>Parent Requests</h2>
+  <table>
+    <tr><th>Child</th><th>Vaccine</th><th>Date</th><th>Hospital</th><th>Action</th></tr>
+    <!-- Approve/Reject Buttons -->
+  </table>
+</section>
+
+<section id="hospital-management">
+  <h2>Hospitals</h2>
+  <button>Add New Hospital</button>
+  <table>
+    <tr><th>Name</th><th>Address</th><th>Contact</th><th>Actions</th></tr>
+    <!-- Update/Delete -->
+  </table>
+</section>
+
+<section id="bookings">
+  <h2>Booking Details</h2>
+  <table>
+    <tr><th>Booking ID</th><th>Child</th><th>Vaccine</th><th>Date</th><th>Status</th></tr>
+  </table>
+</section>
+
+</body>
+</html>

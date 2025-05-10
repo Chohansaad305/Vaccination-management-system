@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vaccine Management System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f8f9fa; }
+    header { background: #0d6efd; color: white; padding: 1rem; text-align: center; }
+    nav { background: #343a40; padding: 1rem; color: white; text-align: center; }
+    nav button { background: #0d6efd; color: white; border: none; margin: 0 10px; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    nav button:hover { background: #0b5ed7; }
+
+    main { padding: 2rem; }
+
+    section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    h2 { color: #0d6efd; margin-bottom: 1rem; }
+
+    label, input, select {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    input[type="text"], input[type="date"] {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button.primary {
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Vaccine Management System</h1>
+</header>
+
+<nav>
+  <button onclick="showSection('child-details')">Child Details</button>
+  <button onclick="showSection('dashboard')">Dashboard</button>
+  <button onclick="showSection('hospital-booking')">Book Hospital</button>
+  <button onclick="showSection('report')">Vaccination Report</button>
+</nav>
+
+<main>
+
+  <!-- Child Details Section -->
+  <section id="child-details">
+    <h2>Child Details</h2>
+    <form id="childForm">
+      <label>Child Name:</label>
+      <input type="text" id="childName" required>
+
+      <label>Date of Birth:</label>
+      <input type="date" id="dob" required>
+
+      <label>Parent Name:</label>
+      <input type="text" id="parentName" required>
+
+      <label>Upcoming Vaccination Date:</label>
+      <input type="date" id="nextVaccine" required>
+
+      <button type="submit" class="primary">Save Details</button>
+    </form>
+  </section>
+
+  <!-- Dashboard Notifications -->
+  <section id="dashboard" class="hidden">
+    <h2>Upcoming Vaccinations</h2>
+    <div id="upcoming"></div>
+  </section>
+
+  <!-- Hospital Booking -->
+  <section id="hospital-booking" class="hidden">
+    <h2>Book Hospital</h2>
+    <input type="text" id="hospitalSearch" placeholder="Search Hospital...">
+    <table id="hospitalTable">
+      <thead>
+        <tr><th>Hospital Name</th><th>Location</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Green Care</td><td>City Center</td><td><button onclick="bookHospital('Green Care')">Book</button></td></tr>
+        <tr><td>HealthFirst Clinic</td><td>East Street</td><td><button onclick="bookHospital('HealthFirst Clinic')">Book</button></td></tr>
+        <tr><td>MedLife Hospital</td><td>North Road</td><td><button onclick="bookHospital('MedLife Hospital')">Book</button></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Vaccination Report -->
+  <section id="report" class="hidden">
+    <h2>Vaccination Report</h2>
+    <table>
+      <thead>
+        <tr><th>Child</th><th>Vaccine</th><th>Date</th><th>Status</th></tr>
+      </thead>
+      <tbody id="reportTable">
+        <tr><td>John Doe</td><td>MMR</td><td>2024-12-01</td><td>Completed</td></tr>
+        <tr><td>Jane Doe</td><td>Hepatitis B</td><td>2025-01-10</td><td>Completed</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('main section').forEach(sec => {
+      sec.classList.add('hidden');
+    });
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  // Save Child Info and Display Upcoming in Dashboard
+  document.getElementById('childForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('childName').value;
+    const vaccineDate = document.getElementById('nextVaccine').value;
+    const upcomingDiv = document.getElementById('upcoming');
+    upcomingDiv.innerHTML = `<p><strong>${name}</strong> has a vaccination scheduled on <strong>${vaccineDate}</strong>.</p>`;
+    alert('Child details saved and vaccination dashboard updated!');
+    showSection('dashboard');
+  });
+
+  // Hospital Search Filter
+  document.getElementById('hospitalSearch').addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#hospitalTable tbody tr');
+    rows.forEach(row => {
+      const hospital = row.cells[0].textContent.toLowerCase();
+      row.style.display = hospital.includes(filter) ? '' : 'none';
+    });
+  });
+
+  // Simulated Booking
+  function bookHospital(name) {
+    alert(`Booking confirmed at ${name}`);
+  }
+</script>
+
+</body>
+</html>
